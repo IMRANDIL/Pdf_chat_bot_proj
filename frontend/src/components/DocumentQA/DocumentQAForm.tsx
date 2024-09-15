@@ -40,7 +40,7 @@ const DocumentQAForm: React.FC = () => {
 
       {response && (
         <div className="response-container">
-          <h3>Response:</h3>
+          <h3>Response: -- </h3>
           <p>{response}</p>
         </div>
       )}
