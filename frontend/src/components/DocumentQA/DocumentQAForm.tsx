@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { fetchDocumentQA } from '../../services/api';
 
 const DocumentQAForm: React.FC = () => {
   const [question, setQuestion] = useState<string>('');
   const [response, setResponse] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleQuestionSubmit = async () => {
     setLoading(true);
@@ -15,6 +17,10 @@ const DocumentQAForm: React.FC = () => {
       console.error('Error asking question:', error);
     }
     setLoading(false);
+  };
+
+  const handleGoBack = () => {
+    navigate('/'); // Redirects to the home screen (uploader)
   };
 
   return (
@@ -38,6 +44,11 @@ const DocumentQAForm: React.FC = () => {
           <p>{response}</p>
         </div>
       )}
+
+      {/* Back to Uploader Button */}
+      <button className="go-back-button" onClick={handleGoBack}>
+        Go Back to Uploader
+      </button>
     </div>
   );
 };

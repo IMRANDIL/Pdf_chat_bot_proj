@@ -159,3 +159,21 @@
   color: #555;
 }
 
+/* Go Back to Uploader Button */
+.go-back-button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background-color: #ff6347;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.go-back-button:hover {
+  background-color: #e5533f;
+}
+
