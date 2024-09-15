@@ -1,33 +1,40 @@
 import React, { useState } from 'react';
-import Input from '../common/Input';
-import Button from '../common/Button';
 import { fetchDocumentQA } from '../../services/api';
 
 const DocumentQAForm: React.FC = () => {
-  const [question, setQuestion] = useState('');
-  const [response, setResponse] = useState('');
+  const [question, setQuestion] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = await fetchDocumentQA(question);
-    setResponse(data.answer);
+  const handleQuestionSubmit = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchDocumentQA(question);
+      setResponse(res.answer);
+    } catch (error) {
+      console.error('Error asking question:', error);
+    }
+    setLoading(false);
   };
 
   return (
-    <div className="qa-form">
-      <form onSubmit={handleSubmit}>
-        <Input
+    <div className="qa-form-container">
+      <h2>Ask a Question</h2>
+      <div className="input-container">
+        <input
+          type="text"
+          placeholder="Enter your question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask a question..."
-          className="input-field"
         />
-        <Button label="Submit" type="submit" className="submit-btn" onClick={() => {}} />
-      </form>
+        <button onClick={handleQuestionSubmit} disabled={loading || !question}>
+          {loading ? 'Loading...' : 'Ask Question'}
+        </button>
+      </div>
 
       {response && (
-        <div className="response">
-          <h2>Answer:</h2>
+        <div className="response-container">
+          <h3>Response:</h3>
           <p>{response}</p>
         </div>
       )}

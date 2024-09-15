@@ -1,47 +1,161 @@
-/* Home Container */
-.home-container {
+.uploader-form {
   display: flex;
+  flex-direction: column;
+  /* align-items: center; */
   justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f4f8;
-  padding: 2rem;
-  text-align: center;
+  /* height: 70vh; */
+  background-color: #f4f4f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
 }
 
-/* Content Wrapper */
-.home-content {
-  max-width: 600px;  /* Reduced width for better centering */
+.uploader-form h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.uploader-form input[type="file"] {
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
   width: 100%;
   text-align: center;
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  margin: 0 auto; /* Ensure it's centered horizontally */
 }
 
-/* Title Styling */
-.home-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #333333;
-  margin-bottom: 1rem;
+.uploader-form input[type="file"]::-webkit-file-upload-button {
+  visibility: hidden;
 }
 
-/* Description Styling */
-.home-description {
-  font-size: 1.25rem;
-  color: #555555;
-  margin-bottom: 2rem;
-  line-height: 1.6;
+.uploader-form input[type="file"]::before {
+  content: 'Select a PDF';
+  display: inline-block;
+  background: #007bff;
+  border: 1px solid #007bff;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-/* Form Container */
-.qa-form {
-  margin-top: 1.5rem;
-  background-color: #f8f9fa;
-  padding: 1.5rem;
+.uploader-form button {
+  padding: 12px 20px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.uploader-form button:hover {
+  background-color: #0056b3;
+}
+
+.uploader-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+
+
+
+/* document form */
+
+
+.qa-form-container {
+  background-color: #f9f9fb;
+  padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: auto;
+  text-align: center;
 }
+
+.qa-form-container h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-container input {
+  padding: 12px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-container input:focus {
+  border-color: #007bff;
+}
+
+.input-container button {
+  padding: 12px 20px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.input-container button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.input-container button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.response-container {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.response-container h3 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.response-container p {
+  font-size: 16px;
+  color: #555;
+}
+

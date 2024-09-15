@@ -1,16 +1,15 @@
 import React from 'react';
-import DocumentQAForm from '../components/DocumentQA/DocumentQAForm';
-
+import UploaderForm from '../components/DocumentQA/UploaderForm';
 
 const Home: React.FC = () => {
   return (
     <div className="home-container">
       <div className="home-content">
-        <h1 className="home-title" style={{textAlign:'center'}}>Document Q&A</h1>
-        <p className="home-description" style={{textAlign:'center'}}>
-          Ask any question about the documents and get accurate responses based on their content.
+        <h1 className="home-title" style={{ textAlign: 'center' }}>Document Q&A</h1>
+        <p className="home-description" style={{ textAlign: 'center' }}>
+          Upload your document and ask any question to get accurate responses based on its content.
         </p>
-        <DocumentQAForm />
+        <UploaderForm />
       </div>
     </div>
   );
