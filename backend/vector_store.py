@@ -8,20 +8,20 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 
 load_dotenv()  # take environment variables from .env.
-os.environ["GOOGLE_API_KEY"]=os.getenv("GOOGLE_API_KEY")
+os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 # To store embeddings and documents globally
 
-
 def setup_vector_store(directory_path):
-    
-
     # Initialize Google Generative AI Embeddings
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
     # Load PDF files from the specified directory
-   
     loader = PyPDFDirectoryLoader(directory_path)
     docs = loader.load()
+
+    # Check if any documents were loaded
+    if not docs:
+        raise ValueError("No PDF files found in the specified directory.")
 
     # Split documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
