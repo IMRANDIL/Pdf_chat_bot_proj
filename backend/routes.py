@@ -33,8 +33,11 @@ def ask_question():
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
+        # Setup the vector store by loading and embedding documents
+        vector_store = setup_vector_store(UPLOAD_FOLDER)
+        
         start = time.process_time()
-        response = generate_response(question)
+        response = generate_response(question, vector_store)
         response_time = time.process_time() - start
         return jsonify({
             "answer": response['answer'],
@@ -68,7 +71,7 @@ def upload_pdf():
             documents = loader.load()
             
             # Embed the uploaded PDF into the vector store
-            setup_vector_store(documents)
+           # setup_vector_store(documents)  # Pass the documents to the vector store setup function
 
             return jsonify({"message": f"PDF '{filename}' uploaded and processed successfully."}), 200
         else:

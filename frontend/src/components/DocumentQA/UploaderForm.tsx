@@ -20,8 +20,8 @@ const UploaderForm: React.FC = () => {
     }
 
     try {
-      const response = await uploadPDF(file);
-      if (response.message === 'PDF uploaded successfully') {
+      const {status, data} = await uploadPDF(file);
+      if (status == 200 && data.message) {
         // Redirect to DocumentQAForm screen after successful upload
         navigate('/qa');
       } else {

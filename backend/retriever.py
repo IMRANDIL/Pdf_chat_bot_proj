@@ -2,11 +2,15 @@ from langchain_groq import ChatGroq
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
-from vector_store import vector_store
+
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
 
 # Load environment variables
 import os
 groq_api_key = os.getenv('GROQ_API_KEY')
+
 
 # Initialize LLM
 llm = ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192")
@@ -23,7 +27,9 @@ prompt_template = ChatPromptTemplate.from_template(
     """
 )
 
-def generate_response(question):
+
+
+def generate_response(question, vector_store):
     if vector_store is None:
         raise ValueError("Vector store is not initialized. Please embed documents first.")
     

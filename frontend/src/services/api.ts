@@ -11,7 +11,7 @@ export const uploadPDF = async (file: File) => {
     },
   });
 
-  return response.data;
+  return {status: response.status, data: response.data};
 };
 
 // API to ask a question about the uploaded PDF
