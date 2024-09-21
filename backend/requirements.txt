@@ -3,6 +3,7 @@ groq
 gunicorn
 langchain-groq
 PyPDF2
+schedule
 langchain_google_genai
 langchain
 langchain_community
