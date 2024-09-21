@@ -12,7 +12,7 @@ const DocumentQAForm: React.FC = () => {
   const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
-    let timeoutId: NodeJ.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     if (loading) {
       timeoutId = setTimeout(() => {
@@ -34,7 +34,7 @@ const DocumentQAForm: React.FC = () => {
       console.log(res)
       setResponse(res.answer);
     } catch (error) {
-      toast.error(error?.response?.data?.error)
+      toast.error((error as any)?.response?.data?.error)
       console.error('Error asking question:', error);
     }
     setLoading(false);
