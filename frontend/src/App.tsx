@@ -17,8 +17,8 @@ const App: React.FC = () => {
               alt="PDF Chat Bot" 
               style={{ width: '100%', maxWidth: '300px', marginBottom: '20px', borderRadius: '8px' }} 
             />
-            <SignInButton style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-              Sign In
+            <SignInButton>
+            <button style={{ backgroundColor: '#007bff', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px' }}>Sign in</button>
             </SignInButton>
           </div>
         </SignedOut>
