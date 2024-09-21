@@ -21,7 +21,7 @@ def clean_upload_folder():
     except Exception as e:
         print(f"Error cleaning upload folder: {e}")
 
-# Scheduler function to run every 2 hours
+# Scheduler function to run every 15 minutes
 def schedule_cleanup():
     schedule.every(15).minutes.do(clean_upload_folder)
 
