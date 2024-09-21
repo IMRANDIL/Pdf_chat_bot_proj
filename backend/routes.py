@@ -9,11 +9,21 @@ from langchain_community.document_loaders import PyPDFLoader
 UPLOAD_FOLDER = './source'  # Directory to store uploaded PDFs
 ALLOWED_EXTENSIONS = {'pdf'}
 
+# Ensure the upload directory exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 api_blueprint = Blueprint('api', __name__)
 
 # Check if the file is a PDF
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# Route to check if the server is live
+@api_blueprint.route('/', methods=['GET'])
+def live():
+    return "It's live now!", 200
 
 # Route to embed documents and create the vector store
 @api_blueprint.route('/embed-documents', methods=['POST'])
