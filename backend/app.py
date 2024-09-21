@@ -28,7 +28,7 @@ def start_cleanup_thread():
 # Main entry point
 if __name__ == "__main__":
     # Start the cleanup thread
-    start_cleanup_thread()
+    # start_cleanup_thread()
     
     # Run the Flask app
     app.run(debug=True)
