@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { fetchDocumentQA } from '../../services/api';
 import { toast } from 'react-toastify';
+import { useUser } from '@clerk/clerk-react'
 
 
 const DocumentQAForm: React.FC = () => {
@@ -10,6 +11,11 @@ const DocumentQAForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showWaitMessage, setShowWaitMessage] = useState<boolean>(false);
   const navigate = useNavigate(); // Initialize navigate
+
+  const {user} = useUser()
+
+  // Access the email address
+const email = user && user.emailAddresses[0].emailAddress;
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -30,7 +36,7 @@ const DocumentQAForm: React.FC = () => {
   const handleQuestionSubmit = async () => {
     setLoading(true);
     try {
-      const res = await fetchDocumentQA(question);
+      const res = await fetchDocumentQA(question, email || '');
       console.log(res)
       setResponse(res.answer);
     } catch (error) {

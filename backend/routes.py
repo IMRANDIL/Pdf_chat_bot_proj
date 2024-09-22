@@ -40,11 +40,15 @@ def ask_question():
     try:
         data = request.json
         question = data.get('question', '')
+        userEmail = data.get('userEmail', '')
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
+        if not userEmail:
+            return jsonify({"error": "No user email provided"}), 400
+        
         # Setup the vector store by loading and embedding documents
-        vector_store = setup_vector_store(UPLOAD_FOLDER)
+        vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail)
         
         start = time.process_time()
         response = generate_response(question, vector_store)

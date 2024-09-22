@@ -18,9 +18,10 @@ export const uploadPDF = async (file: File, userEmail: string) => {
 };
 
 // API to ask a question about the uploaded PDF
-export const fetchDocumentQA = async (question: string) => {
+export const fetchDocumentQA = async (question: string, userEmail: string) => {
   const response = await axios.post(`http://localhost:5000/ask-question`, {
     question,
+    userEmail,
   });
   return response.data;
 };
