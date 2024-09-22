@@ -37,7 +37,6 @@ const email = user && user.emailAddresses[0].emailAddress;
     setLoading(true);
     try {
       const res = await fetchDocumentQA(question, email || '');
-      console.log(res)
       setResponse(res.answer);
     } catch (error) {
       toast.error((error as any)?.response?.data?.error)
