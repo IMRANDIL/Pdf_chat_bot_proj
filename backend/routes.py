@@ -92,8 +92,8 @@ def upload_pdf():
             file.save(filepath)
             
             # Load the PDF and process it
-            loader = PyPDFLoader(filepath)
-            documents = loader.load()
+            # loader = PyPDFLoader(filepath)
+            # documents = loader.load()
             
             return jsonify({"message": f"PDF '{filename}' uploaded to '{user_dir}' successfully."}), 200
         else:
