@@ -27,4 +27,4 @@ def schedule_cleanup():
             logging.error("Error during cleanup: %s", str(e))
         
         # Wait for 5 minutes before the next cleanup
-        time.sleep(300)  # 300 seconds = 5 minutes
+        time.sleep(3600)  # 300 seconds = 5 minutes
