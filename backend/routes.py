@@ -61,6 +61,16 @@ def ask_question():
 @api_blueprint.route('/upload-pdf', methods=['POST'])
 def upload_pdf():
     try:
+        # Get the email from form data
+        user_email = request.form.get('email')
+        if not user_email:
+            return jsonify({"error": "No email provided"}), 400
+        
+        # Create a directory for the email if it doesn't exist
+        user_dir = os.path.join(UPLOAD_FOLDER, user_email)
+        if not os.path.exists(user_dir):
+            os.makedirs(user_dir)
+        
         # Check if the POST request has the file part
         if 'file' not in request.files:
             return jsonify({"error": "No file part"}), 400
@@ -73,17 +83,14 @@ def upload_pdf():
         # Check if the file is allowed
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            filepath = os.path.join(user_dir, filename)  # Save file in the user's directory
             file.save(filepath)
             
             # Load the PDF and process it
             loader = PyPDFLoader(filepath)
             documents = loader.load()
             
-            # Embed the uploaded PDF into the vector store
-           # setup_vector_store(documents)  # Pass the documents to the vector store setup function
-
-            return jsonify({"message": f"PDF '{filename}' uploaded and processed successfully."}), 200
+            return jsonify({"message": f"PDF '{filename}' uploaded to '{user_dir}' successfully."}), 200
         else:
             return jsonify({"error": "Only PDF files are allowed"}), 400
     except Exception as e:

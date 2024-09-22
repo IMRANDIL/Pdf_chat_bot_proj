@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadPDF } from '../../services/api';
+import { useUser } from '@clerk/clerk-react'
 
 const UploaderForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -8,7 +9,10 @@ const UploaderForm: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadText, setUploadText] = useState('Uploading...');
   const navigate = useNavigate();
+  const {user} = useUser()
 
+  // Access the email address
+const email = user && user.emailAddresses[0].emailAddress;
   // Handle file change event
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -40,7 +44,7 @@ const UploaderForm: React.FC = () => {
     setUploadText('Uploading...');
 
     try {
-      const { status, data } = await uploadPDF(file);
+      const { status, data } = await uploadPDF(file, email || '');
       if (status === 200 && data.message) {
         // Redirect to DocumentQAForm screen after successful upload
         navigate('/qa');

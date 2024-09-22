@@ -23,7 +23,7 @@ def clean_upload_folder():
 
 # Scheduler function to run every 15 minutes
 def schedule_cleanup():
-    schedule.every(15).minutes.do(clean_upload_folder)
+    schedule.every(2).minutes.do(clean_upload_folder)
 
     while True:
         schedule.run_pending()

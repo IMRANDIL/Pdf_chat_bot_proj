@@ -6,6 +6,8 @@ import DocumentQAForm from './components/DocumentQA/DocumentQAForm';
 import './App.css';
 import gifyBot from './assets/giphy_bot.gif';
 
+
+
 const App: React.FC = () => {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -15,10 +17,10 @@ const App: React.FC = () => {
             <img 
               src={gifyBot}
               alt="PDF Chat Bot" 
-              style={{ width: '100%', maxWidth: '300px', marginBottom: '20px', borderRadius: '8px' }} 
+              style={{ width: '100%', maxWidth: '200px', marginBottom: '20px', borderRadius: '8px' }} 
             />
             <SignInButton>
-            <button style={{ backgroundColor: '#007bff', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px' }}>Sign in</button>
+            <button style={{ backgroundColor: '#007bff', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>Sign in</button>
             </SignInButton>
           </div>
         </SignedOut>
