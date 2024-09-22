@@ -1,4 +1,5 @@
 import os
+import shutil
 from flask import Blueprint, request, jsonify
 import time
 from werkzeug.utils import secure_filename
@@ -97,5 +98,18 @@ def upload_pdf():
             return jsonify({"message": f"PDF '{filename}' uploaded to '{user_dir}' successfully."}), 200
         else:
             return jsonify({"error": "Only PDF files are allowed"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Route to clean the UPLOAD_FOLDER
+@api_blueprint.route('/clean-upload-folder', methods=['GET'])
+def clean_upload_folder():
+    try:
+        for root, dirs, files in os.walk(UPLOAD_FOLDER):
+            for file in files:
+                os.remove(os.path.join(root, file))
+            for dir in dirs:
+                shutil.rmtree(os.path.join(root, dir))
+        return jsonify({"message": "Upload folder cleaned successfully."}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

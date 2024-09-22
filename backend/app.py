@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import logging
 import threading
 from routes import api_blueprint
-from cleanup_dir import schedule_cleanup  # Import the cleanup scheduler
+from cleanup_2_dir import schedule_cleanup  # Import the cleanup scheduler
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ def start_cleanup_thread():
 # Main entry point
 if __name__ == "__main__":
     # Start the cleanup thread
-    # start_cleanup_thread()
+    start_cleanup_thread()
     
     # Run the Flask app
     app.run(debug=True)
