@@ -19,7 +19,7 @@ const email = user && user.emailAddresses[0].emailAddress;
     <>
     {!email && <h2 style={{textAlign:'center'}}>Please Sign In to chat your doc(pdf)</h2>}
     <div style={{ display: 'flex', justifyContent: 'center', height: '100vh', backgroundImage: `url(${!email && backgroundImage})`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
-      <header style={{ textAlign: 'center' }}>
+      <header style={{ textAlign: 'center', marginTop:'12px' }}>
        
         <SignedOut>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
