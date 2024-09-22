@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadPDF } from '../../services/api';
 import { useUser } from '@clerk/clerk-react'
+import { toast } from 'react-toastify';
 
 const UploaderForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -16,7 +17,12 @@ const email = user && user.emailAddresses[0].emailAddress;
   // Handle file change event
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.type !== 'application/pdf') {
+        toast.error('File should be PDF only');
+      } else {
+        setFile(file);
+      }
     }
   };
 
