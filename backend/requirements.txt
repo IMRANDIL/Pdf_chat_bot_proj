@@ -3,6 +3,8 @@ groq
 gunicorn
 langchain-groq
 PyPDF2
+chromadb==0.5.5
+chroma-migrate
 schedule
 langchain_google_genai
 langchain

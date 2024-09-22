@@ -3,3 +3,4 @@ node_modules
 venv
 __pycache__
 source
+source_croma_db
