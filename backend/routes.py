@@ -6,8 +6,8 @@ from werkzeug.utils import secure_filename
 from retriever import generate_response
 # from vector_store import setup_vector_store
 # from langchain_community.document_loaders import PyPDFLoader
-# from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from vector_store import setup_vector_store
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from vector_store import setup_vector_store,load_faiss_index
 
 UPLOAD_FOLDER = './source'  # Directory to store uploaded PDFs
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -158,48 +158,44 @@ def embed_documents():
 
 @api_blueprint.route('/ask-question', methods=['POST'])
 def ask_question():
-    """
-    API endpoint that takes a user's question and returns an answer based on the user's
-    PDF documents, processed through ChromaDB vector store for similarity-based retrieval.
-    """
     try:
-        # Extract data from the request
         data = request.json
         question = data.get('question', '')
         userEmail = data.get('userEmail', '')
 
-        # Validate inputs
         if not question:
             return jsonify({"error": "No question provided"}), 400
+
         if not userEmail:
             return jsonify({"error": "No user email provided"}), 400
-        
-        # Load or setup the ChromaDB collection for the user
-   
-        # Load or setup the ChromaDB collection for the user
-        collection = setup_vector_store(UPLOAD_FOLDER, userEmail)
-    
-        # Create a retriever from the collection
-        # retriever = collection.as_retriever(
-        #     search_type="mmr",
-        #     search_kwargs={"k": 1, "fetch_k": 5}
-        # )
 
-        # Generate a response from the vector store using the question
+        # Path where FAISS index is saved
+        faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, "faiss_index")
+
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+        # Check if FAISS index exists, if not, create it
+        if not os.path.exists(faiss_index_path):
+            # Set up vector store by embedding documents
+            documents_folder = os.path.join(UPLOAD_FOLDER, userEmail, "documents")
+            vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
+        else:
+            # Load FAISS vector store
+            vector_store = load_faiss_index(faiss_index_path, embeddings)
+
+        # Generate response using the loaded vector store
         start = time.process_time()
-        response = generate_response(question, collection)
+        response = generate_response(question, vector_store)
         response_time = time.process_time() - start
 
-        # Return the generated response, the context, and the response time
         return jsonify({
             "answer": response['answer'],
             "response_time": response_time,
             "context": [doc.page_content for doc in response["context"]]
         }), 200
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 

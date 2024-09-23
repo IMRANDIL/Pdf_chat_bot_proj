@@ -362,65 +362,146 @@ def sanitize_collection_name(email):
 #     return collection
 
 
-def setup_vector_store(directory_path, user_email, batch_size=10):
-    """Setup ChromaDB vector store."""
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", embedding_dim=384)  # Adjusted embedding dimension
+# def setup_vector_store(directory_path, user_email, batch_size=10):
+#     """Setup ChromaDB vector store."""
+#     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")  
     
+#     user_dir = os.path.join(directory_path, user_email)
+#     if not os.path.exists(user_dir):
+#         raise ValueError(f"No directory found for the user: {user_email}")
+
+#     loader = PyPDFDirectoryLoader(user_dir)
+#     docs = loader.load()
+    
+#     if not docs:
+#         raise ValueError("No PDF files found in the user's directory.")
+
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+#     batch_split_docs = text_splitter.split_documents(docs)
+
+#     # Sanitize the user email for the collection name
+#     collection_name = sanitize_collection_name(user_email)
+#     collection = chroma_persistent_client.get_or_create_collection(collection_name)
+
+#     # Prepare lists to hold documents, embeddings, metadata, and ids
+#     document_contents = []
+#     embeddings_list = []
+#     metadatas = []
+#     ids = []
+
+#     existing_ids = set()  # To track existing IDs
+
+#     for doc in batch_split_docs:
+#         try:
+#             vector = embeddings.embed_query(doc.page_content)  # Adjusted to use the corrected embedding model
+#             document_contents.append(doc.page_content)
+#             embeddings_list.append(vector)
+#             metadatas.append({"page_content": doc.page_content})
+
+#             # Generate a unique ID
+#             base_id = doc.metadata.get("doc_id", f"{user_email}_{len(ids)}")
+#             unique_id = base_id
+
+#             # Ensure uniqueness by appending a counter if necessary
+#             counter = 1
+#             while unique_id in existing_ids:
+#                 unique_id = f"{base_id}_{counter}"
+#                 counter += 1
+
+#             existing_ids.add(unique_id)
+#             ids.append(unique_id)
+
+#         except Exception as e:
+#             logging.error(f"Error processing document: {e}")
+
+#     # Add all at once
+#     collection.add(
+#         documents=document_contents,
+#         embeddings=embeddings_list,
+#         metadatas=metadatas,
+#         ids=ids
+#     )
+
+#     logging.info("Vector store is ready.")
+#     return collection
+
+
+
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import os
+from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFDirectoryLoader
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# Set the Google API Key from the environment
+os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+
+# Function to setup the FAISS vector store with disk storage
+def setup_vector_store(directory_path, user_email, save_path, batch_size=10):
+    """
+    This function processes documents in batches, creates their embeddings, 
+    and stores them in a FAISS index that is saved to disk for reuse.
+    """
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
     user_dir = os.path.join(directory_path, user_email)
     if not os.path.exists(user_dir):
         raise ValueError(f"No directory found for the user: {user_email}")
 
     loader = PyPDFDirectoryLoader(user_dir)
     docs = loader.load()
-    
+
     if not docs:
         raise ValueError("No PDF files found in the user's directory.")
 
+    vector_store = None
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    batch_split_docs = text_splitter.split_documents(docs)
 
-    # Sanitize the user email for the collection name
-    collection_name = sanitize_collection_name(user_email)
-    collection = chroma_persistent_client.get_or_create_collection(collection_name)
+    for i in range(0, len(docs), batch_size):
+        batch_docs = docs[i:i+batch_size]
+        batch_split_docs = text_splitter.split_documents(batch_docs)
 
-    # Prepare lists to hold documents, embeddings, metadata, and ids
-    document_contents = []
-    embeddings_list = []
-    metadatas = []
-    ids = []
+        if vector_store is None:
+            vector_store = FAISS.from_documents(batch_split_docs, embeddings)
+        else:
+            vector_store.add_documents(batch_split_docs)
 
-    existing_ids = set()  # To track existing IDs
+    # Save FAISS index to the specified path
+    save_faiss_index(vector_store, save_path)
 
-    for doc in batch_split_docs:
-        try:
-            vector = embeddings.embed_query(doc.page_content)  # Adjusted to use the corrected embedding model
-            document_contents.append(doc.page_content)
-            embeddings_list.append(vector)
-            metadatas.append({"page_content": doc.page_content})
+    print("Vector store is ready and saved to disk.")
+    return vector_store
 
-            # Generate a unique ID
-            base_id = doc.metadata.get("doc_id", f"{user_email}_{len(ids)}")
-            unique_id = base_id
+# Function to save the FAISS index to a directory
+def save_faiss_index(vector_store, save_path):
+    """
+    Save the FAISS index to disk so that it can be reused without recalculating embeddings.
 
-            # Ensure uniqueness by appending a counter if necessary
-            counter = 1
-            while unique_id in existing_ids:
-                unique_id = f"{base_id}_{counter}"
-                counter += 1
+    Parameters:
+    - vector_store: The FAISS vector store object.
+    - save_path: The directory where the FAISS index should be saved.
+    """
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    vector_store.save_local(save_path)
 
-            existing_ids.add(unique_id)
-            ids.append(unique_id)
+# Function to load the FAISS index from a directory if it exists
+def load_faiss_index(save_path, embeddings):
+    """
+    Load the FAISS index from disk if it exists to avoid recomputation.
 
-        except Exception as e:
-            logging.error(f"Error processing document: {e}")
+    Parameters:
+    - save_path: The directory where the FAISS index is saved.
+    - embeddings: The embeddings model to associate with the FAISS index.
 
-    # Add all at once
-    collection.add(
-        documents=document_contents,
-        embeddings=embeddings_list,
-        metadatas=metadatas,
-        ids=ids
-    )
-
-    logging.info("Vector store is ready.")
-    return collection
+    Returns:
+    - The loaded FAISS vector store.
+    """
+    if os.path.exists(save_path):
+        return FAISS.load_local(save_path, embeddings, allow_dangerous_deserialization=True)
+    else:
+        raise FileNotFoundError(f"No FAISS index found at {save_path}")
