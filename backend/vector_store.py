@@ -427,12 +427,94 @@ def sanitize_collection_name(email):
 
 
 
+# from langchain_community.vectorstores import FAISS
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain_google_genai import GoogleGenerativeAIEmbeddings
+# import os
+# from dotenv import load_dotenv
+# from langchain_community.document_loaders import PyPDFDirectoryLoader
+
+# # Load environment variables from the .env file
+# load_dotenv()
+
+# # Set the Google API Key from the environment
+# os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+
+# # Function to setup the FAISS vector store with disk storage
+# def setup_vector_store(directory_path, user_email, save_path, batch_size=10):
+#     """
+#     This function processes documents in batches, creates their embeddings, 
+#     and stores them in a FAISS index that is saved to disk for reuse.
+#     """
+#     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+#     user_dir = os.path.join(directory_path, user_email)
+#     if not os.path.exists(user_dir):
+#         raise ValueError(f"No directory found for the user: {user_email}")
+
+#     loader = PyPDFDirectoryLoader(user_dir)
+#     docs = loader.load()
+
+#     if not docs:
+#         raise ValueError("No PDF files found in the user's directory.")
+
+#     vector_store = None
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+
+#     for i in range(0, len(docs), batch_size):
+#         batch_docs = docs[i:i+batch_size]
+#         batch_split_docs = text_splitter.split_documents(batch_docs)
+
+#         if vector_store is None:
+#             vector_store = FAISS.from_documents(batch_split_docs, embeddings)
+#         else:
+#             vector_store.add_documents(batch_split_docs)
+
+#     # Save FAISS index to the specified path
+#     save_faiss_index(vector_store, save_path)
+
+#     print("Vector store is ready and saved to disk.")
+#     return vector_store
+
+# # Function to save the FAISS index to a directory
+# def save_faiss_index(vector_store, save_path):
+#     """
+#     Save the FAISS index to disk so that it can be reused without recalculating embeddings.
+
+#     Parameters:
+#     - vector_store: The FAISS vector store object.
+#     - save_path: The directory where the FAISS index should be saved.
+#     """
+#     if not os.path.exists(save_path):
+#         os.makedirs(save_path)
+#     vector_store.save_local(save_path)
+
+# # Function to load the FAISS index from a directory if it exists
+# def load_faiss_index(save_path, embeddings):
+#     """
+#     Load the FAISS index from disk if it exists to avoid recomputation.
+
+#     Parameters:
+#     - save_path: The directory where the FAISS index is saved.
+#     - embeddings: The embeddings model to associate with the FAISS index.
+
+#     Returns:
+#     - The loaded FAISS vector store.
+#     """
+#     if os.path.exists(save_path):
+#         return FAISS.load_local(save_path, embeddings, allow_dangerous_deserialization=True)
+#     else:
+#         raise FileNotFoundError(f"No FAISS index found at {save_path}")
+
+
+
+
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import os
 from dotenv import load_dotenv
-from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -440,40 +522,36 @@ load_dotenv()
 # Set the Google API Key from the environment
 os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
-# Function to setup the FAISS vector store with disk storage
-def setup_vector_store(directory_path, user_email, save_path, batch_size=10):
+# Function to setup the FAISS vector store with disk storage for a specific document
+def setup_vector_store(document_path, user_email, save_path, batch_size=10):
     """
-    This function processes documents in batches, creates their embeddings, 
+    This function processes a specific document, creates its embeddings, 
     and stores them in a FAISS index that is saved to disk for reuse.
     """
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-    user_dir = os.path.join(directory_path, user_email)
-    if not os.path.exists(user_dir):
-        raise ValueError(f"No directory found for the user: {user_email}")
+    if not os.path.exists(document_path):
+        raise ValueError(f"No document found at path: {document_path}")
 
-    loader = PyPDFDirectoryLoader(user_dir)
+    loader = PyPDFLoader(document_path)
     docs = loader.load()
 
     if not docs:
-        raise ValueError("No PDF files found in the user's directory.")
+        raise ValueError(f"No valid content found in the document: {document_path}")
 
     vector_store = None
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-    for i in range(0, len(docs), batch_size):
-        batch_docs = docs[i:i+batch_size]
-        batch_split_docs = text_splitter.split_documents(batch_docs)
+    # Split document content into chunks
+    split_docs = text_splitter.split_documents(docs)
 
-        if vector_store is None:
-            vector_store = FAISS.from_documents(batch_split_docs, embeddings)
-        else:
-            vector_store.add_documents(batch_split_docs)
+    # Create FAISS index from document chunks
+    vector_store = FAISS.from_documents(split_docs, embeddings)
 
     # Save FAISS index to the specified path
     save_faiss_index(vector_store, save_path)
 
-    print("Vector store is ready and saved to disk.")
+    print(f"Vector store for {document_path} is ready and saved to disk.")
     return vector_store
 
 # Function to save the FAISS index to a directory

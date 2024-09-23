@@ -28,6 +28,35 @@ def allowed_file(filename):
 def live():
     return "It's live now!", 200
 
+
+
+# Route to list all PDFs uploaded by a user
+@api_blueprint.route('/list-docs', methods=['GET'])
+def list_docs():
+    try:
+        # Get the email from query parameters
+        user_email = request.args.get('email')
+        if not user_email:
+            return jsonify({"error": "No email provided"}), 400
+
+        # Construct the user's upload directory
+        user_dir = os.path.join(UPLOAD_FOLDER, user_email)
+        
+        # Check if the directory exists
+        if not os.path.exists(user_dir):
+            return jsonify({"message": "No documents found for this user."}), 200
+
+        # Get a list of all PDF files in the user's directory
+        documents = [doc for doc in os.listdir(user_dir) if doc.endswith('.pdf')]
+
+        # Return the list of documents
+        return jsonify({"documents": documents}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
 # Route to embed documents and create the vector store
 @api_blueprint.route('/embed-documents', methods=['POST'])
 def embed_documents():
@@ -37,124 +66,51 @@ def embed_documents():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# # Route to process user query and retrieve the response
+
+
 # @api_blueprint.route('/ask-question', methods=['POST'])
 # def ask_question():
 #     try:
 #         data = request.json
 #         question = data.get('question', '')
 #         userEmail = data.get('userEmail', '')
+
 #         if not question:
 #             return jsonify({"error": "No question provided"}), 400
-        
+
 #         if not userEmail:
 #             return jsonify({"error": "No user email provided"}), 400
-        
-#         # Setup the vector store by loading and embedding documents
-#         vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail)
-        
-#         start = time.process_time()
-#         response = generate_response(question, vector_store)
-#         response_time = time.process_time() - start
-#         return jsonify({
-#             "answer": response['answer'],
-#             "response_time": response_time,
-#             "context": [doc.page_content for doc in response["context"]]
-#         }), 200
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
 
-# @api_blueprint.route('/ask-question', methods=['POST'])
-# def ask_question():
-#     """
-#     API endpoint that takes a user's question and returns an answer based on the user's
-#     PDF documents, processed through FAISS vector store for similarity-based retrieval.
-#     """
-#     try:
-#         # Extract data from the request
-#         data = request.json
-#         question = data.get('question', '')
-#         userEmail = data.get('userEmail', '')
+#         # Path where FAISS index is saved
+#         faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, "faiss_index")
 
-#         # Validate inputs
-#         if not question:
-#             return jsonify({"error": "No question provided"}), 400
-#         if not userEmail:
-#             return jsonify({"error": "No user email provided"}), 400
-        
-#         # Path to the user's FAISS index
-#         faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, 'faiss_index')
-
-#         # Initialize embeddings model
 #         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        
-#         # Load FAISS index if it exists, otherwise create it
-#         if os.path.exists(faiss_index_path):
-#             # Load the FAISS index from disk
-#             vector_store = load_faiss_index(faiss_index_path, embeddings)
+
+#         # Check if FAISS index exists, if not, create it
+#         if not os.path.exists(faiss_index_path):
+#             # Set up vector store by embedding documents
+#             documents_folder = os.path.join(UPLOAD_FOLDER, userEmail, "documents")
+#             vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
 #         else:
-#             # Set up the vector store and save it
-#             vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail)
-#             save_faiss_index(vector_store, faiss_index_path)
+#             # Load FAISS vector store
+#             vector_store = load_faiss_index(faiss_index_path, embeddings)
 
-#         # Generate a response from the vector store using the question
+#         # Generate response using the loaded vector store
 #         start = time.process_time()
 #         response = generate_response(question, vector_store)
 #         response_time = time.process_time() - start
 
-#         # Return the generated response, the context, and the response time
 #         return jsonify({
 #             "answer": response['answer'],
 #             "response_time": response_time,
 #             "context": [doc.page_content for doc in response["context"]]
 #         }), 200
-    
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-
-# @api_blueprint.route('/ask-question', methods=['POST'])
-# def ask_question():
-#     """
-#     API endpoint that takes a user's question and returns an answer based on the user's
-#     PDF documents, processed through ChromaDB for similarity-based retrieval.
-#     """
-#     try:
-#         # Extract data from the request
-#         data = request.json
-#         question = data.get('question', '')
-#         userEmail = data.get('userEmail', '')
-
-#         # Validate inputs
-#         if not question:
-#             return jsonify({"error": "No question provided"}), 400
-#         if not userEmail:
-#             return jsonify({"error": "No user email provided"}), 400
-
-#         # Initialize embeddings model
-#         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
-#         # Load ChromaDB collection if it exists, otherwise create it
-#         try:
-#             vector_store = load_chroma_collection(userEmail)
-#         except FileNotFoundError:
-#             # If no collection exists, set up the vector store and save it
-#             vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail)
-
-#         # Generate a response from the vector store using the question
-#         query_vector = embeddings.embed_text(question)
-#         results = vector_store.query(query_embeddings=[query_vector], n_results=5)
-
-#         # Prepare the response based on the retrieved documents
-#         response = {
-#             'answer': results['documents'][0]['page_content'] if results['documents'] else "No relevant documents found.",
-#             'context': [doc['page_content'] for doc in results['documents']]
-#         }
-
-#         return jsonify(response), 200
 
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
+
+
+
 
 @api_blueprint.route('/ask-question', methods=['POST'])
 def ask_question():
@@ -162,6 +118,7 @@ def ask_question():
         data = request.json
         question = data.get('question', '')
         userEmail = data.get('userEmail', '')
+        doc_name = data.get('doc_name', '')  # Get the document name
 
         if not question:
             return jsonify({"error": "No question provided"}), 400
@@ -169,16 +126,22 @@ def ask_question():
         if not userEmail:
             return jsonify({"error": "No user email provided"}), 400
 
-        # Path where FAISS index is saved
-        faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, "faiss_index")
+        if not doc_name:
+            return jsonify({"error": "No document name provided"}), 400
+
+        # Path where FAISS index is saved for this specific document
+        faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, f"{doc_name}_faiss_index")
 
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
         # Check if FAISS index exists, if not, create it
         if not os.path.exists(faiss_index_path):
-            # Set up vector store by embedding documents
-            documents_folder = os.path.join(UPLOAD_FOLDER, userEmail, "documents")
-            vector_store = setup_vector_store(UPLOAD_FOLDER, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
+            # Set up vector store by embedding the selected document
+            document_path = os.path.join(UPLOAD_FOLDER, userEmail, doc_name)
+            if not os.path.exists(document_path):
+                return jsonify({"error": f"Document '{doc_name}' not found for user '{userEmail}'"}), 404
+            
+            vector_store = setup_vector_store(document_path, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
         else:
             # Load FAISS vector store
             vector_store = load_faiss_index(faiss_index_path, embeddings)
@@ -196,6 +159,9 @@ def ask_question():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
 
 
 
