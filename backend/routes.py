@@ -112,13 +112,63 @@ def embed_documents():
 
 
 
+# @api_blueprint.route('/ask-question', methods=['POST'])
+# def ask_question():
+#     try:
+#         data = request.json
+#         question = data.get('question', '')
+#         userEmail = data.get('userEmail', '')
+#         doc_name = data.get('doc_name', '')  # Get the document name
+
+#         if not question:
+#             return jsonify({"error": "No question provided"}), 400
+
+#         if not userEmail:
+#             return jsonify({"error": "No user email provided"}), 400
+
+#         if not doc_name:
+#             return jsonify({"error": "No document name provided"}), 400
+
+#         # Path where FAISS index is saved for this specific document
+#         faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, f"{doc_name}_faiss_index")
+
+#         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+#         # Check if FAISS index exists, if not, create it
+#         if not os.path.exists(faiss_index_path):
+#             # Set up vector store by embedding the selected document
+#             document_path = os.path.join(UPLOAD_FOLDER, userEmail, doc_name)
+#             if not os.path.exists(document_path):
+#                 return jsonify({"error": f"Document '{doc_name}' not found for user '{userEmail}'"}), 404
+            
+#             vector_store = setup_vector_store(document_path, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
+#         else:
+#             # Load FAISS vector store
+#             vector_store = load_faiss_index(faiss_index_path, embeddings)
+
+#         # Generate response using the loaded vector store
+#         start = time.process_time()
+#         response = generate_response(question, vector_store)
+#         response_time = time.process_time() - start
+
+#         return jsonify({
+#             "answer": response['answer'],
+#             "response_time": response_time,
+#             "context": [doc.page_content for doc in response["context"]]
+#         }), 200
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+
+
 @api_blueprint.route('/ask-question', methods=['POST'])
 def ask_question():
     try:
         data = request.json
         question = data.get('question', '')
         userEmail = data.get('userEmail', '')
-        doc_name = data.get('doc_name', '')  # Get the document name
+        doc_name = data.get('doc_name', '')
 
         if not question:
             return jsonify({"error": "No question provided"}), 400
@@ -130,21 +180,23 @@ def ask_question():
             return jsonify({"error": "No document name provided"}), 400
 
         # Path where FAISS index is saved for this specific document
+        document_path = os.path.join(UPLOAD_FOLDER, userEmail, doc_name)
         faiss_index_path = os.path.join(UPLOAD_FOLDER, userEmail, f"{doc_name}_faiss_index")
+
+        # Check if the document exists first
+        if not os.path.exists(document_path):
+            return jsonify({"error": f"Document '{doc_name}' not found for user '{userEmail}'"}), 404
 
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
         # Check if FAISS index exists, if not, create it
-        if not os.path.exists(faiss_index_path):
-            # Set up vector store by embedding the selected document
-            document_path = os.path.join(UPLOAD_FOLDER, userEmail, doc_name)
-            if not os.path.exists(document_path):
-                return jsonify({"error": f"Document '{doc_name}' not found for user '{userEmail}'"}), 404
-            
-            vector_store = setup_vector_store(document_path, userEmail, faiss_index_path)  # Pass faiss_index_path to save the FAISS index
-        else:
+        vector_store = None
+        if os.path.exists(faiss_index_path):
             # Load FAISS vector store
             vector_store = load_faiss_index(faiss_index_path, embeddings)
+        else:
+            # Set up vector store by embedding the selected document
+            vector_store = setup_vector_store(document_path, userEmail, faiss_index_path)
 
         # Generate response using the loaded vector store
         start = time.process_time()
@@ -159,9 +211,6 @@ def ask_question():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-
 
 
 

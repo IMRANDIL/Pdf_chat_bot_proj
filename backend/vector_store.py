@@ -286,18 +286,18 @@ os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 logging.basicConfig(level=logging.INFO)
 
 # Function to initialize Chroma clients
-def initialize_clients():
-    """Initialize Chroma clients."""
-    try:
-        chroma_client = chromadb.Client()  # Temporary client
-        chroma_persistent_client = chromadb.PersistentClient("source_croma_db")  # Persistent client
-        return chroma_client, chroma_persistent_client
-    except Exception as e:
-        logging.error(f"Error initializing Chroma clients: {e}")
-        raise
+# def initialize_clients():
+#     """Initialize Chroma clients."""
+#     try:
+#         chroma_client = chromadb.Client()  # Temporary client
+#         chroma_persistent_client = chromadb.PersistentClient("source_croma_db")  # Persistent client
+#         return chroma_client, chroma_persistent_client
+#     except Exception as e:
+#         logging.error(f"Error initializing Chroma clients: {e}")
+#         raise
 
-# Initialize clients
-chroma_client, chroma_persistent_client = initialize_clients()
+# # Initialize clients
+# chroma_client, chroma_persistent_client = initialize_clients()
 
 # Function to sanitize the collection name
 def sanitize_collection_name(email):
